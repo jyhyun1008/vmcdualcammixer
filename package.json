@@ -1,0 +1,16 @@
+{
+  "name": "vmcdualcammixer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "osc": "^2.4.4",
+    "quaternion": "^1.5.1"
+  }
+}
