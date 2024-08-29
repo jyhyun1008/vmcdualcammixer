@@ -8,7 +8,7 @@
 
 - [Demo 1 (August 28, 2024, KST)](https://www.youtube.com/watch?v=nLQhRoKg1lo)
 - [Demo 2 (August 29, 2024, KST)](https://www.youtube.com/watch?v=qQcTNW8PaQg)
-- [Demo 3 (August 30, 2024, KST)](https://www.youtube.com/watch?v=v5PnMnwvdMQ)
+- [Demo 3 (August 30, 2024, KST)](https://youtu.be/qcJkKVz7u1o)
 
 ### What Can It Do?
 
