@@ -177,14 +177,14 @@ sendPort.on("ready", function () {
                 result2.push(num2 / receiveArray.tdpt.length)
             }
 
-            if (part == 'LeftUpperArm' && Math.abs(result2[5]) > 0.4) {
+            if (part == 'LeftUpperArm' && Math.abs(result1[5]) > 0.4 && Math.abs(result1[4]) < 0.2 && Math.abs(result1[3]) < 0.2) {
                 isLeftArmVisible = false
-            } else if(part == 'LeftUpperArm' && Math.abs(result2[5]) <= 0.4) {
+            } else if(part == 'LeftUpperArm') {
                 isLeftArmVisible = true
             }
-            if (part == 'RightUpperArm' && Math.abs(result1[5]) > 0.4) {
+            if (part == 'RightUpperArm' && Math.abs(result2[5]) > 0.4 && Math.abs(result2[4]) < 0.2 && Math.abs(result2[3]) < 0.2) {
                 isRightArmVisible = false
-            } else if(part == 'RightUpperArm' && Math.abs(result1[5]) <= 0.4)  {
+            } else if(part == 'RightUpperArm')  {
                 isRightArmVisible = true
             }
             euler2 = new Quaternion(result2[6], result2[3], result2[4], result2[5]).toEuler()
@@ -200,32 +200,26 @@ sendPort.on("ready", function () {
             var diff2Mean = 0
             if (receiveArray.formerWmc) {
                 var diff1 = result1.map((x, y) => x - receiveArray.formerWmc[y]);
-                diff1Mean = diff1[3]**2 + diff1[4]**2 + diff1[5]**2
+                diff1Mean = diff1[3]**2 + diff1[4]**2 + diff1[5]**2 + diff1[6]**2
             }
             if (receiveArray.formerTdpt) {
                 var diff2 = result2.map((x, y) => x - receiveArray.formerTdpt[y]);
-                diff2Mean = diff2[3]**2 + diff2[4]**2 + diff2[5]**2
+                diff2Mean = diff2[3]**2 + diff2[4]**2 + diff2[5]**2 + diff1[6]**2
             }
             for(var j = 0; j < result2.length; j++){
                 if ('HipsSpineHeadNeckRoot'.includes(part)) {
                     result3.push(result2[j])
-                } else if (diff1Mean > 0.3) {
+                } else if (diff1Mean > 1) {
                     result3.push(result2[j])
-                } else if (diff2Mean > 0.3) {
-                    if (j < 3) {
-                        result3.push(result2[j])
-                    } else {
-                        result3.push(result1[j])
-                    }
+                } else if (diff2Mean > 1) {
+                    result3.push(result1[j])
                 } else if ( isLeftArmVisible == false && isRightArmVisible == false ) {
                     if ((part.includes('Right') && part.includes('Arm')) || (part.includes('Left') && part.includes('Leg'))) {
-                        result3.push(result2[j])
-                    } else if ((part.includes('Left') && part.includes('Arm')) || (part.includes('Right') && part.includes('Leg'))) {
                         result3.push(result1[j])
+                    } else if ((part.includes('Left') && part.includes('Arm')) || (part.includes('Right') && part.includes('Leg'))) {
+                        result3.push(result2[j])
                     } else {
-                        if (j < 3) {
-                            result3.push(result2[j])
-                        } else if (j > 2 && j < 6) {
+                        if (j > 2 && j < 6) {
                             result3.push(q3_xyz[j-3])
                         } else if (j == 6) {
                             result3.push(q3_w)
@@ -235,13 +229,11 @@ sendPort.on("ready", function () {
                     }
                 } else if ( isLeftArmVisible == true && isRightArmVisible == true ) {
                     if (part.includes('Left')) {
-                        result3.push(result2[j])
-                    } else if (part.includes('Right')) {
                         result3.push(result1[j])
+                    } else if (part.includes('Right')) {
+                        result3.push(result2[j])
                     } else {
-                        if (j < 3) {
-                            result3.push(result2[j])
-                        } else if (j > 2 && j < 6) {
+                        if (j > 2 && j < 6) {
                             result3.push(q3_xyz[j-3])
                         } else if (j == 6) {
                             result3.push(q3_w)
@@ -250,14 +242,12 @@ sendPort.on("ready", function () {
                         }
                     }
                 } else if (isLeftArmVisible == false && isRightArmVisible == true) {
-                    if ( part.includes('Arm') || (part.includes('Right') && part.includes('Leg')) ) {
-                        result3.push(result2[j])
-                    } else if ((part.includes('Left') && part.includes('Leg'))) {
+                    if ((part.includes('Left') && part.includes('Leg')) ) {
                         result3.push(result1[j])
+                    } else if ( part.includes('Arm') || (part.includes('Right') && part.includes('Leg'))) {
+                        result3.push(result2[j])
                     } else {
-                        if (j < 3) {
-                            result3.push(result2[j])
-                        } else if (j > 2 && j < 6) {
+                        if (j > 2 && j < 6) {
                             result3.push(q3_xyz[j-3])
                         } else if (j == 6) {
                             result3.push(q3_w)
@@ -266,14 +256,12 @@ sendPort.on("ready", function () {
                         }
                     }
                 } else if (isRightArmVisible == false && isLeftArmVisible == true) {
-                    if ((part.includes('Right') && part.includes('Leg'))) {
-                        result3.push(result2[j])
-                    } else if (part.includes('Arm') || (part.includes('Left') && part.includes('Leg'))) {
+                    if ( part.includes('Arm') || (part.includes('Left') && part.includes('Leg'))) {
                         result3.push(result1[j])
+                    } else if ((part.includes('Right') && part.includes('Leg'))) {
+                        result3.push(result2[j])
                     } else {
-                        if (j < 3) {
-                            result3.push(result2[j])
-                        } else if (j > 2 && j < 6) {
+                        if (j > 2 && j < 6) {
                             result3.push(q3_xyz[j-3])
                         } else if (j == 6) {
                             result3.push(q3_w)
@@ -282,9 +270,7 @@ sendPort.on("ready", function () {
                         }
                     }
                 } else {
-                    if (j < 3) {
-                        result3.push(result2[j])
-                    } else if (j > 2 && j < 6) {
+                    if (j > 2 && j < 6) {
                         result3.push(q3_xyz[j-3])
                     } else if (j == 6) {
                         result3.push(q3_w)
@@ -294,36 +280,37 @@ sendPort.on("ready", function () {
                 }
             }
             if (receiveArray.former) {
-                var diff3 =  result3.slice(1).map((x, y) => x - receiveArray.former.slice(1)[y]);
-                var diffresult = diff3[3]**2 + diff3[4]**2 + diff3[5]**2
-                if (diffresult > 2) {
-                    sendPort.send({
-                        address: '/VMC/Ext/Bone/Pos',
-                        args: receiveArray.former
-                    })
-                    return [result1, result2, receiveArray.former]
-                } else {
-                    sendPort.send({
-                        address: '/VMC/Ext/Bone/Pos',
-                        args: result3
-                    })
-                    return [result1, result2, result3]
+                eulerformer = new Quaternion(receiveArray.former[7], receiveArray.former[4], receiveArray.former[5], receiveArray.former[6]).toEuler()
+                for (var i=1; i<4;i++) {
+                    var eulerresult = eulerformer.map((x, y) => ( (5-i)* x + i * euler3[y])/5)
+                    var qResult = Quaternion.fromEuler(...eulerresult)
+                    var qR_w = qResult.real()
+                    var qR_xyz = qResult.imag()
+                    var newResult = result3.slice(0, 4).concat(qR_xyz)
+                    newResult.push(qR_w)
+                    setTimeout(() => {
+                        sendPort.send({
+                            address: '/VMC/Ext/Bone/Pos',
+                            args: newResult
+                        })
+                    }, i*15);
                 }
+                return [result1, result2, result3]
+            } else {
+                return [result1, result2, result3]
             }
-            return [result1, result2, result3]
         }
         return [result1, result2, receiveArray.former]
     }
 
     udpPort.on("message", function (oscMessage) {
         if (!triggered) {
-            record = false
             setInterval(() => {
                 receive = true
                 setTimeout(() => {
                     receive = false
-                }, 50);
-            }, 70) // 10fps
+                }, 40);
+            }, 50) // 20fps
         }
         triggered = true
 

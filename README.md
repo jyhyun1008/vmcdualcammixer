@@ -1,33 +1,36 @@
-# VMC Dual Cam Mixer
+## VMC Dual Cam Mixer
 
-> Mix two signal from dual camera through VMC protocol
+**VMC Dual Cam Mixer** is a project designed to mix signals from two cameras using the VMC (Virtual Motion Capture) protocol. This tool is particularly useful for correcting specific motion capture scenarios that are difficult to capture accurately with a single camera, such as extending an arm forward or lifting a leg while looking sideways.
 
-![](https://for.stella.place/D1/0cd16d01-9af7-4fd2-acca-1d8df368671c.webp)
+### Demo Videos
 
-# 데모
+- [Demo 1 (August 28, 2024, KST)](https://www.youtube.com/watch?v=nLQhRoKg1lo)
+- [Demo 2 (August 29, 2024, KST)](https://www.youtube.com/watch?v=qQcTNW8PaQg)
 
-* [유튜브 링크](https://www.youtube.com/watch?v=nLQhRoKg1lo)
+### What Can It Do?
 
-# 뭘 할 수 있나요?
+The main goal of the VMC Dual Cam Mixer is to allow for the correction of motions that are hard to capture properly with just one camera by using two separate motion capture programs. For instance, if one camera struggles to capture a specific movement, the other camera can fill in the gaps, resulting in a more accurate overall motion.
 
-한쪽 카메라로 제대로 담을 수 없었던 팔을 앞으로 뻗는 동작이라든지, 옆을 본 상태에서 한쪽 다리를 들어올리는 동작 같은 것을 모션캡쳐 프로그램 두 개를 사용해서 보정하는 것을 목표로 합니다.
+- The character in the center follows the movements of the **left-side character**:
+  
+  ![Left character movement](https://for.stella.place/D1/b4b8fda3-ce52-4434-8972-6fd7b1886839.webp)
 
-![](https://for.stella.place/D1/b4b8fda3-ce52-4434-8972-6fd7b1886839.webp)
+- The character in the center follows the movements of the **right-side character**:
 
-가운데 캐릭터가 **왼쪽 캐릭터**의 동작을 따라하고 있습니다.
+  ![Right character movement](https://for.stella.place/D1/22dda791-8eda-4bdf-ae97-3cc9749666ce.webp)
 
-![](https://for.stella.place/D1/22dda791-8eda-4bdf-ae97-3cc9749666ce.webp)
+**Key Difference**: Unlike other similar software, you don't need to specify which signal each bone receives from which port; instead, the VMC Dual Cam Mixer simply merges all the signals together.
 
-가운데 캐릭터가 **오른쪽 캐릭터**의 동작을 따라하고 있습니다.
+### Important Notes
 
-기존 비슷한 소프트와의 차이점은 본 하나하나에 어떤 포트에서 수신한 신호를 받을지를 지정하는 게 아니라, 모든 신호를 **그냥 섞어준다**는 것입니다.
+- **Current Status**: The project is still in an early stage and may not be fully functional yet. The creator is working on improving it.
+- The software assumes you have one program running locally (e.g., Webcam Motion Capture) and another on a remote device (e.g., an iPhone using TDPT).
+- Facial expressions and finger movements are received from the **local software**.
+- Compatibility and synchronization between the two programs may vary, requiring extensive testing.
+- The setup assumes both cameras are capable of capturing the entire body. If not, the results may be distorted. Ensure you're capturing the full body from a distance in a spacious area.
+- **Recommended Field of View**: 45 - 70 degrees.
+- This is a Node.js project, so you will need Node.js installed on your system.
 
-# 주의사항
+### Recent Updates
 
-* **아직 굉장히 부족한 프로젝트이며 아직은 그냥 전기 먹는 쓰레기에 불과합니다만 조만간 잘 돌아가게 만들어 오겠습니다...**
-* 로컬(코드를 돌리는 컴퓨터)에서 돌아가는 소프트웨어 하나, 리모트(아이폰 등...)에서 돌아가는 소프트웨어 하나가 있는 것을 전제로 합니다. 개인적으로 전자는 Webcam Motion Capture, 후자는 TDPT를 사용합니다.
-* 표정과 손가락 같은 정보는 **로컬 소프트웨어에서 받습니다.**
-* 이 소프트웨어들이 상성이 맞는 경우가 있고 아닌 경우가 있으며, 경우에 따라 싱크가 맞는 경우가 있고 아닌 경우가 있으니 여러 번의 테스트가 필요합니다.
-* 두 대의 카메라가 전신을 제대로 촬영하는 것을 또한 전제로 합니다... 이게 안 될 경우 결과물이 상당히 이상해집니다. 넓은 곳에서 최대한 멀리서 전신을 촬영해주세요.
-* 추천 시야각: 45 - 70도
-* 노드JS 프로젝트입니다. 노드가 필요합니다.
+- **August 29, 2024 (KST)**: Improved smoother motion capture capabilities.
