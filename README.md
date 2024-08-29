@@ -2,6 +2,8 @@
 
 **VMC Dual Cam Mixer** is a project designed to mix signals from two cameras using the VMC (Virtual Motion Capture) protocol. This tool is particularly useful for correcting specific motion capture scenarios that are difficult to capture accurately with a single camera, such as extending an arm forward or lifting a leg while looking sideways.
 
+<img width="971" alt="image" src="https://github.com/user-attachments/assets/59b3999b-c182-4667-a3ec-df437c61240e">
+
 ### Demo Videos
 
 - [Demo 1 (August 28, 2024, KST)](https://www.youtube.com/watch?v=nLQhRoKg1lo)
