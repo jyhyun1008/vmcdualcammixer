@@ -65,7 +65,7 @@ var tdptPort = new osc.UDPPort({
 });
 
 var wmcPort = new osc.UDPPort({
-    localAddress: "127.0.0.1",
+    localAddress: process.env.LOCALHOST,
     localPort: process.env.LOCALPORT,
     remotePort: 39538
 });
@@ -81,8 +81,6 @@ wmcPort.open();
 
 tdptPort.on("ready", function () {
     var ipAddresses = getIPAddresses();
-
-    console.log("Listening for OSC over UDP.");
     ipAddresses.forEach(function (address) {
         console.log("TDPT Port On");
     });
@@ -98,10 +96,17 @@ tdptPort.on("message", function (oscMessage) {
     }
 })
 
+function mod2Pi(angle) {
+    var re = angle % (2*Math.PI)
+    if (re < -1*Math.PI) {
+        return re + (2*Math.PI)
+    } else {
+        return re
+    }
+}
+
 wmcPort.on("ready", function () {
     var ipAddresses = getIPAddresses();
-
-    console.log("Listening for OSC over UDP.");
     ipAddresses.forEach(function (address) {
         console.log("WMC Port On");
     });
@@ -115,59 +120,60 @@ wmcPort.on("message", function (oscMessage) {
             args: oscMessage.args,
         })
     } else {
-        wmcPort.send(oscMessage)
+        sendPort.send(oscMessage)
     }
 })
 
 udpPort.on("ready", function () {
     var ipAddresses = getIPAddresses();
-
-    console.log("Listening for OSC over UDP.");
     ipAddresses.forEach(function (address) {
-        console.log(" Host:", address + ", Port:", udpPort.options.localPort);
+        console.log("Local Receiving Port On");
     });
 });
 
-
 sendPort.on("ready", function () {
     var ipAddresses = getIPAddresses();
-
-    console.log("Listening for OSC over UDP.");
     ipAddresses.forEach(function (address) {
-        console.log(" Host:", address + ", Port:", sendPort.options.localPort);
+        console.log("Host:", sendPort.options.localAddress + ", Port:", sendPort.options.remotePort);
     });
+})
 
-
-    function averageAndSender(message) {
-        var part = message.args[0]
-        if (receive == true) {
-            if (message.args[8] == 'wmc') {
-                eval(`receive${part}Array.wmc.push(message.args.slice(1, 8))`)
-            } else {
-                eval(`receive${part}Array.tdpt.push(message.args.slice(1, 8))`)
-            }
-        } else if (receive == false) {
-            var resultArr = eval(`averager('${part}', receive${part}Array)`)
-            eval(`receive${part}Array.wmc.push(message.args.slice(1, 8))\nreceive${part}Array = {wmc: [], tdpt: [], formerWmc: resultArr[0], formerTdpt: resultArr[1], former: resultArr[2]}`)
+function averageAndSender(message) {
+    var part = message.args[0]
+    if (receive == true) {
+        if (message.args[8] == 'wmc') {
+            eval(`receive${part}Array.wmc.push(message.args.slice(1, 8))`)
+        } else {
+            eval(`receive${part}Array.tdpt.push(message.args.slice(1, 8))`)
         }
+    } else {
+        var resultArr = eval(`averager('${part}', receive${part}Array)`)
+        eval(`receive${part}Array.wmc.push(message.args.slice(1, 8))\nreceive${part}Array = {wmc: [], tdpt: [], formerWmc: resultArr[0], formerTdpt: resultArr[1], former: resultArr[2]}`)
     }
+}
 
-    function averager(part, receiveArray) {
-        if (receiveArray.wmc.length > 0 && receiveArray.tdpt.length > 0  ) {
-            var result1 = []
-            var euler1, euler2
-            for(var i = 0; i < receiveArray.wmc[0].length; i++){
+function averager(part, receiveArray) {
+    if (receiveArray.wmc.length > 0 && receiveArray.tdpt.length > 0 ) {
+        var result1 = []
+        var euler1, euler2
+        for(var i = 0; i < receiveArray.wmc[0].length; i++){
+            if ( i < 3 ) {
                 var num = 0;
                 var numArray = []
                 for(var j = 0; j < receiveArray.wmc.length; j++){ 
                     num += receiveArray.wmc[j][i];
                     numArray.push(receiveArray.wmc[j][i])
                 }
-                result1.push(num / receiveArray.wmc.length) // 평균
+                result1.push(num / receiveArray.wmc.length)
+            } else {
+                result1.push(receiveArray.wmc[receiveArray.wmc.length - 1][i])
             }
-            euler1 = new Quaternion(result1[6], result1[3], result1[4], result1[5]).toEuler()
-            var result2 = []
-            for(var i2 = 0; i2 < receiveArray.tdpt[0].length; i2++){
+        }
+        euler1 = new Quaternion(result1[6], result1[3], result1[4], result1[5]).toEuler()
+
+        var result2 = []
+        for(var i2 = 0; i2 < receiveArray.tdpt[0].length; i2++){
+            if ( i2 < 3 ) {
                 var num2 = 0;
                 var numArray2 = []
                 for(var j2 = 0; j2 < receiveArray.tdpt.length; j2++){ 
@@ -175,158 +181,153 @@ sendPort.on("ready", function () {
                     numArray2.push(receiveArray.tdpt[j2][i2])
                 }
                 result2.push(num2 / receiveArray.tdpt.length)
+            } else {
+                result2.push(receiveArray.tdpt[receiveArray.tdpt.length - 1][i2])
             }
+        }
+        euler2 = new Quaternion(result2[6], result2[3], result2[4], result2[5]).toEuler()
 
-            if (part == 'LeftUpperArm' && Math.abs(result1[5]) > 0.4 && Math.abs(result1[4]) < 0.2 && Math.abs(result1[3]) < 0.2) {
-                isLeftArmVisible = false
-            } else if(part == 'LeftUpperArm') {
-                isLeftArmVisible = true
-            }
-            if (part == 'RightUpperArm' && Math.abs(result2[5]) > 0.4 && Math.abs(result2[4]) < 0.2 && Math.abs(result2[3]) < 0.2) {
-                isRightArmVisible = false
-            } else if(part == 'RightUpperArm')  {
-                isRightArmVisible = true
-            }
-            euler2 = new Quaternion(result2[6], result2[3], result2[4], result2[5]).toEuler()
-            var result3 = [part]
-            var euler3 = []
-            for (var i = 0; i < euler2.length; i++) {
-                euler3.push((euler1[i] + euler2[i])/2)
+        if (part == 'LeftUpperArm' && Math.abs(result2[5]) > 0.35 && Math.abs(result2[4]) < 0.2 && Math.abs(result2[3]) < 0.2) {
+            isLeftArmVisible = false
+        } else if(part == 'LeftUpperArm') {
+            isLeftArmVisible = true
+        }
+        if (part == 'RightUpperArm' && Math.abs(result1[5]) > 0.35 && Math.abs(result1[4]) < 0.2 && Math.abs(result1[3]) < 0.2) {
+            isRightArmVisible = false
+        } else if(part == 'RightUpperArm') {
+            isRightArmVisible = true
+        }
+
+        var result3 = [part]
+        var euler3 = []
+        var diff1Mean = 0
+        var diff2Mean = 0
+
+        var averageFunc = function() {
+            for (var i = 0; i < 3; i++) {
+                euler3.push((mod2Pi(euler1[i]+euler2[i]))/2)
             }
             var q3 = Quaternion.fromEuler(...euler3)
             var q3_w = q3.real()
             var q3_xyz = q3.imag()
-            var diff1Mean = 0
-            var diff2Mean = 0
-            if (receiveArray.formerWmc) {
-                var diff1 = result1.map((x, y) => x - receiveArray.formerWmc[y]);
-                diff1Mean = diff1[3]**2 + diff1[4]**2 + diff1[5]**2 + diff1[6]**2
-            }
-            if (receiveArray.formerTdpt) {
-                var diff2 = result2.map((x, y) => x - receiveArray.formerTdpt[y]);
-                diff2Mean = diff2[3]**2 + diff2[4]**2 + diff2[5]**2 + diff1[6]**2
-            }
-            for(var j = 0; j < result2.length; j++){
-                if ('HipsSpineHeadNeckRoot'.includes(part)) {
-                    result3.push(result2[j])
-                } else if (diff1Mean > 1) {
-                    result3.push(result2[j])
-                } else if (diff2Mean > 1) {
-                    result3.push(result1[j])
-                } else if ( isLeftArmVisible == false && isRightArmVisible == false ) {
-                    if ((part.includes('Right') && part.includes('Arm')) || (part.includes('Left') && part.includes('Leg'))) {
-                        result3.push(result1[j])
-                    } else if ((part.includes('Left') && part.includes('Arm')) || (part.includes('Right') && part.includes('Leg'))) {
-                        result3.push(result2[j])
-                    } else {
-                        if (j > 2 && j < 6) {
-                            result3.push(q3_xyz[j-3])
-                        } else if (j == 6) {
-                            result3.push(q3_w)
-                        } else {
-                            result3.push((result1[j] + result2[j])/2)
-                        }
-                    }
-                } else if ( isLeftArmVisible == true && isRightArmVisible == true ) {
-                    if (part.includes('Left')) {
-                        result3.push(result1[j])
-                    } else if (part.includes('Right')) {
-                        result3.push(result2[j])
-                    } else {
-                        if (j > 2 && j < 6) {
-                            result3.push(q3_xyz[j-3])
-                        } else if (j == 6) {
-                            result3.push(q3_w)
-                        } else {
-                            result3.push((result1[j] + result2[j])/2)
-                        }
-                    }
-                } else if (isLeftArmVisible == false && isRightArmVisible == true) {
-                    if ((part.includes('Left') && part.includes('Leg')) ) {
-                        result3.push(result1[j])
-                    } else if ( part.includes('Arm') || (part.includes('Right') && part.includes('Leg'))) {
-                        result3.push(result2[j])
-                    } else {
-                        if (j > 2 && j < 6) {
-                            result3.push(q3_xyz[j-3])
-                        } else if (j == 6) {
-                            result3.push(q3_w)
-                        } else {
-                            result3.push((result1[j] + result2[j])/2)
-                        }
-                    }
-                } else if (isRightArmVisible == false && isLeftArmVisible == true) {
-                    if ( part.includes('Arm') || (part.includes('Left') && part.includes('Leg'))) {
-                        result3.push(result1[j])
-                    } else if ((part.includes('Right') && part.includes('Leg'))) {
-                        result3.push(result2[j])
-                    } else {
-                        if (j > 2 && j < 6) {
-                            result3.push(q3_xyz[j-3])
-                        } else if (j == 6) {
-                            result3.push(q3_w)
-                        } else {
-                            result3.push((result1[j] + result2[j])/2)
-                        }
-                    }
-                } else {
-                    if (j > 2 && j < 6) {
-                        result3.push(q3_xyz[j-3])
-                    } else if (j == 6) {
-                        result3.push(q3_w)
-                    } else {
-                        result3.push((result1[j] + result2[j])/2)
-                    }
-                }
-            }
-            if (receiveArray.former) {
-                eulerformer = new Quaternion(receiveArray.former[7], receiveArray.former[4], receiveArray.former[5], receiveArray.former[6]).toEuler()
-                for (var i=1; i<4;i++) {
-                    var eulerresult = eulerformer.map((x, y) => ( (5-i)* x + i * euler3[y])/5)
-                    var qResult = Quaternion.fromEuler(...eulerresult)
-                    var qR_w = qResult.real()
-                    var qR_xyz = qResult.imag()
-                    var newResult = result3.slice(0, 4).concat(qR_xyz)
-                    newResult.push(qR_w)
-                    setTimeout(() => {
-                        sendPort.send({
-                            address: '/VMC/Ext/Bone/Pos',
-                            args: newResult
-                        })
-                    }, i*15);
-                }
-                return [result1, result2, result3]
-            } else {
-                return [result1, result2, result3]
-            }
+            
+            var avr = result1.slice(0,3).map((x, y) => (x + result2.slice(0,3)[y])/2);
+            result3 = result3.concat(avr).concat(q3_xyz)
+            result3.push(q3_w)
         }
-        return [result1, result2, receiveArray.former]
-    }
 
-    udpPort.on("message", function (oscMessage) {
-        if (!triggered) {
-            setInterval(() => {
-                receive = true
-                setTimeout(() => {
-                    receive = false
-                }, 40);
-            }, 50) // 20fps
+        if (receiveArray.formerWmc) {
+            var diff1 = result1.map((x, y) => x - receiveArray.formerWmc[y]);
+            diff1Mean = diff1[3]**2 + diff1[4]**2 + diff1[5]**2 + diff1[6]**2
         }
-        triggered = true
+        if (receiveArray.formerTdpt) {
+            var diff2 = result2.map((x, y) => x - receiveArray.formerTdpt[y]);
+            diff2Mean = diff2[3]**2 + diff2[4]**2 + diff2[5]**2 + diff1[6]**2
+        }
 
-        if (oscMessage.address == '/VMC/Ext/Bone/Pos') {
-            if (PARTS.includes(oscMessage.args[0])) {
-                averageAndSender(oscMessage)
+        if ('HipsSpineHeadNeckUpperChestRoot'.includes(part) || diff1Mean > 0.4) {
+            result3 = result3.concat(result2)
+            euler3 = euler2
+        } else if (diff2Mean > 0.4) {
+            result3 = result3.concat(result1)
+            euler3 = euler1
+        } else if ( isLeftArmVisible == false && isRightArmVisible == false ) {
+            if ((part.includes('Right') && part.includes('Arm')) || (part.includes('Right') && part.includes('Hand')) || (part.includes('Left') && part.includes('Leg')) || (part.includes('Left') && part.includes('Foot'))) {
+                result3 = result3.concat(result1)
+                euler3 = euler1
+            } else if ((part.includes('Left') && part.includes('Arm')) || (part.includes('Left') && part.includes('Hand')) || (part.includes('Right') && part.includes('Leg')) || (part.includes('Right') && part.includes('Foot'))) {
+                result3 = result3.concat(result2)
+                euler3 = euler2
             } else {
-                sendPort.send(oscMessage)
+                averageFunc()
             }
-
+        } else if ( isLeftArmVisible == true && isRightArmVisible == true ) {
+            if (part.includes('Left')) {
+                result3 = result3.concat(result1)
+                euler3 = euler1
+            } else if (part.includes('Right')) {
+                result3 = result3.concat(result2)
+                euler3 = euler2
+            } else {
+                averageFunc()
+            }
+        } else if (isLeftArmVisible == false && isRightArmVisible == true) {
+            if ((part.includes('Left') && part.includes('Leg')) || (part.includes('Left') && part.includes('Foot'))) {
+                result3 = result3.concat(result1)
+                euler3 = euler1
+            } else if ( part.includes('Arm') || part.includes('Hand') || (part.includes('Right') && part.includes('Leg')) || (part.includes('Right') && part.includes('Foot'))) {
+                result3 = result3.concat(result2)
+                euler3 = euler2
+            } else {
+                averageFunc()
+            }
+        } else if (isRightArmVisible == false && isLeftArmVisible == true) {
+            if ( part.includes('Arm') || part.includes('Hand') || (part.includes('Left') && part.includes('Leg')) || (part.includes('Left') && part.includes('Foot'))) {
+                result3 = result3.concat(result1)
+                euler3 = euler1
+            } else if ((part.includes('Right') && part.includes('Leg')) || (part.includes('Right') && part.includes('Foot'))) {
+                result3 = result3.concat(result2)
+                euler3 = euler2
+            } else {
+                averageFunc()
+            }
         } else {
-            sendPort.send(oscMessage)
+            averageFunc()
         }
-    });
-    udpPort.on("error", function (err) {
-        console.log(err);
-    });
-    udpPort.open();
-})
+
+        async function smoother() {
+            var index = [1,2,3,4,5,6]
+            var newResultArray = []
+            for await (let i of index) {
+                var positresult = receiveArray.former.slice(1,4).map((x, y) => (((6-i)* x + i * result3.slice(1,4)[y])/6))
+                var eulerresult = eulerformer.map((x, y) => (((6-i)* x + i * euler3[y])/6))
+                var qResult = Quaternion.fromEuler(...eulerresult)
+                var qR_w = qResult.real()
+                var qR_xyz = qResult.imag()
+                var newResult = [part].concat(positresult).concat(qR_xyz)
+                newResult.push(qR_w)
+                newResultArray.push(newResult)
+                setTimeout(() => {
+                    sendPort.send({
+                        address: '/VMC/Ext/Bone/Pos',
+                        args: newResultArray[i-1]
+                    })
+                }, (i-1)*17);
+            }
+        }
+
+        if (receiveArray.former) {
+            eulerformer = new Quaternion(receiveArray.former[7], receiveArray.former[4], receiveArray.former[5], receiveArray.former[6]).toEuler()
+            smoother()
+        }
+        return [result1, result2, result3]
+    }
+    return [[], [], receiveArray.former]
+}
+
+udpPort.on("message", function (oscMessage) {
+    if (!triggered) {
+        setInterval(() => {
+            receive = true
+            setTimeout(() => {
+                receive = false
+            }, 50);
+        }, 100) // 10 fps
+    }
+    triggered = true
+
+    if (oscMessage.address == '/VMC/Ext/Bone/Pos') {
+        if (PARTS.includes(oscMessage.args[0])) {
+            averageAndSender(oscMessage)
+        } else if (oscMessage.args[8] == 'wmc') {
+            sendPort.send({
+                address: oscMessage.address,
+                args: oscMessage.args.slice(0, 8)
+            })
+        }
+    }
+});
+udpPort.on("error", function (err) {
+    console.log(err);
+});
+udpPort.open();

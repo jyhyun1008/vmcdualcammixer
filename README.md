@@ -8,6 +8,7 @@
 
 - [Demo 1 (August 28, 2024, KST)](https://www.youtube.com/watch?v=nLQhRoKg1lo)
 - [Demo 2 (August 29, 2024, KST)](https://www.youtube.com/watch?v=qQcTNW8PaQg)
+- [Demo 3 (August 30, 2024, KST)](https://www.youtube.com/watch?v=v5PnMnwvdMQ)
 
 ### What Can It Do?
 
@@ -36,3 +37,4 @@ The main goal of the VMC Dual Cam Mixer is to allow for the correction of motion
 ### Recent Updates
 
 - **August 29, 2024 (KST)**: Improved smoother motion capture capabilities.
+- **August 30, 2024 (KST)**: Improved the efficiency of the code.
