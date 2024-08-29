@@ -37,4 +37,4 @@ The main goal of the VMC Dual Cam Mixer is to allow for the correction of motion
 ### Recent Updates
 
 - **August 29, 2024 (KST)**: Improved smoother motion capture capabilities.
-- **August 30, 2024 (KST)**: Improved the efficiency of the code.
+- **August 30, 2024 (KST)**: Improved the efficiency of the code. + Fixed an issue where the Root Bone was not being recognized.

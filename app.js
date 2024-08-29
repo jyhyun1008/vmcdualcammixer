@@ -93,6 +93,8 @@ tdptPort.on("message", function (oscMessage) {
             address: oscMessage.address,
             args: oscMessage.args
         })
+    } else if (oscMessage.address == '/VMC/Ext/Root/Pos') {
+        sendPort.send(oscMessage)
     }
 })
 
@@ -119,7 +121,7 @@ wmcPort.on("message", function (oscMessage) {
             address: oscMessage.address,
             args: oscMessage.args,
         })
-    } else {
+    } else if (oscMessage.address != '/VMC/Ext/Root/Pos') {
         sendPort.send(oscMessage)
     }
 })
@@ -297,8 +299,10 @@ function averager(part, receiveArray) {
         }
 
         if (receiveArray.former) {
-            eulerformer = new Quaternion(receiveArray.former[7], receiveArray.former[4], receiveArray.former[5], receiveArray.former[6]).toEuler()
-            smoother()
+            if (receiveArray.former.length > 0) {
+                eulerformer = new Quaternion(receiveArray.former[7], receiveArray.former[4], receiveArray.former[5], receiveArray.former[6]).toEuler()
+                smoother()
+            }
         }
         return [result1, result2, result3]
     }
