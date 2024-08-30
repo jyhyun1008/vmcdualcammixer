@@ -98,13 +98,22 @@ tdptPort.on("message", function (oscMessage) {
     }
 })
 
-function mod2Pi(angle) {
+function modPi(angle) {
     var re = angle % (2*Math.PI)
     if (re < -1*Math.PI) {
         return re + (2*Math.PI)
-    } else {
-        return re
+    } else if (re > Math.PI) {
+        return re - (2*Math.PI)
     }
+    return re
+}
+
+function mod2Pi(angle) {
+    var re = angle % (2*Math.PI)
+    if (re < 0) {
+        return re + (2*Math.PI)
+    }
+    return re
 }
 
 wmcPort.on("ready", function () {
@@ -189,12 +198,12 @@ function averager(part, receiveArray) {
         }
         euler2 = new Quaternion(result2[6], result2[3], result2[4], result2[5]).toEuler()
 
-        if (part == 'LeftUpperArm' && Math.abs(result2[5]) > 0.35 && Math.abs(result2[4]) < 0.2 && Math.abs(result2[3]) < 0.2) {
+        if (part == 'LeftUpperArm' && result2[5] > 0.35 && Math.abs(result2[4]) < 0.2 && Math.abs(result2[3]) < 0.2) {
             isLeftArmVisible = false
         } else if(part == 'LeftUpperArm') {
             isLeftArmVisible = true
         }
-        if (part == 'RightUpperArm' && Math.abs(result1[5]) > 0.35 && Math.abs(result1[4]) < 0.2 && Math.abs(result1[3]) < 0.2) {
+        if (part == 'RightUpperArm' && result1[5] < -0.35 && Math.abs(result1[4]) < 0.2 && Math.abs(result1[3]) < 0.2) {
             isRightArmVisible = false
         } else if(part == 'RightUpperArm') {
             isRightArmVisible = true
@@ -207,7 +216,11 @@ function averager(part, receiveArray) {
 
         var averageFunc = function() {
             for (var i = 0; i < 3; i++) {
-                euler3.push((mod2Pi(euler1[i]+euler2[i]))/2)
+                if (i == 0 || i == 2) {
+                    euler3.push(mod2Pi(euler1[i] + modPi(euler2[i] - euler1[i])/2))
+                } else {
+                    euler3.push(euler1[i] + modPi(euler2[i] - euler1[i])/2)
+                }
             }
             var q3 = Quaternion.fromEuler(...euler3)
             var q3_w = q3.real()
@@ -278,11 +291,18 @@ function averager(part, receiveArray) {
         }
 
         async function smoother() {
-            var index = [1,2,3,4,5,6]
+            var index = [1,2,3,4,5,6,7,8,9,10,11,12]
             var newResultArray = []
             for await (let i of index) {
-                var positresult = receiveArray.former.slice(1,4).map((x, y) => (((6-i)* x + i * result3.slice(1,4)[y])/6))
-                var eulerresult = eulerformer.map((x, y) => (((6-i)* x + i * euler3[y])/6))
+                var positresult = receiveArray.former.slice(1,4).map((x, y) => (((12-i)* x + i * result3.slice(1,4)[y])/12))
+                var eulerresult = []
+                for (var j = 0; j<3; j++) {
+                    if (j == 0 || j == 2) {
+                        eulerresult.push(mod2Pi(eulerformer[j] + i * (modPi(euler3[j] - eulerformer[j]))/12))
+                    } else {
+                        eulerresult.push(modPi(eulerformer[j] + i * (modPi(euler3[j] - eulerformer[j]))/12))
+                    }
+                }
                 var qResult = Quaternion.fromEuler(...eulerresult)
                 var qR_w = qResult.real()
                 var qR_xyz = qResult.imag()
@@ -290,6 +310,9 @@ function averager(part, receiveArray) {
                 newResult.push(qR_w)
                 newResultArray.push(newResult)
                 setTimeout(() => {
+                    // if (part == 'Head'){
+                    //     console.log(newResultArray[i-1][7])
+                    // }
                     sendPort.send({
                         address: '/VMC/Ext/Bone/Pos',
                         args: newResultArray[i-1]
@@ -315,8 +338,8 @@ udpPort.on("message", function (oscMessage) {
             receive = true
             setTimeout(() => {
                 receive = false
-            }, 50);
-        }, 100) // 10 fps
+            }, 150);
+        }, 200) // 5 fps
     }
     triggered = true
 

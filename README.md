@@ -8,7 +8,7 @@
 
 - [Demo 1 (August 28, 2024, KST)](https://www.youtube.com/watch?v=nLQhRoKg1lo)
 - [Demo 2 (August 29, 2024, KST)](https://www.youtube.com/watch?v=qQcTNW8PaQg)
-- [Demo 3 (August 30, 2024, KST)](https://youtu.be/qcJkKVz7u1o)
+- [Demo 3 (August 30, 2024, KST)](https://www.youtube.com/watch?v=kLajA1VHR4k): Dance Video
 
 ### What Can It Do?
 
@@ -38,3 +38,4 @@ The main goal of the VMC Dual Cam Mixer is to allow for the correction of motion
 
 - **August 29, 2024 (KST)**: Improved smoother motion capture capabilities.
 - **August 30, 2024 (KST)**: Improved the efficiency of the code. + Fixed an issue where the Root Bone was not being recognized.
+- **August 30, 2024 (KST)**: Fixed an issue where the Bone's direction frequently flipped, and turning around was incorrectly recognized as facing forward.
