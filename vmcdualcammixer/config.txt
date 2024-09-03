@@ -1,0 +1,27 @@
+--- Connect your LEFT HAND SIDED device to: ---
+LEFTIP (127.0.0.1)
+127.0.0.1
+
+LEFTPORT (39532)
+39532
+--- Please put this device on your left hand side ---
+
+--- Connect your RIGHT HAND SIDED device to: ---
+RIGHTIP (192.168.x.x)
+192.168.45.122
+
+RIGHTPORT (39531)
+39531
+--- And put this devide on your right hand side ---
+
+--- Also, you want to send mixed data to: ---
+SENDIP (127.0.0.1)
+127.0.0.1
+
+SENDPORT (39539)
+39539
+--- Now turn on your device, click the .exe file and enjoy! ---
+
+P.S.
+--- Port 39538 is occupied by this software. If you want to change this: ---
+39538

@@ -6,9 +6,8 @@
 
 ### Demo Videos
 
-- [Demo 1 (August 28, 2024, KST)](https://www.youtube.com/watch?v=nLQhRoKg1lo)
-- [Demo 2 (August 29, 2024, KST)](https://www.youtube.com/watch?v=qQcTNW8PaQg)
-- [Demo 3 (August 30, 2024, KST)](https://www.youtube.com/watch?v=kLajA1VHR4k): Dance Video
+- [Demo (August 31, 2024, KST)](https://www.youtube.com/watch?v=W1B7syI2zeA)
+- [Dance Video (August 31, 2024, KST)](https://www.youtube.com/watch?v=CjclBkex2lo)
 
 ### What Can It Do?
 
@@ -32,10 +31,12 @@ The main goal of the VMC Dual Cam Mixer is to allow for the correction of motion
 - Compatibility and synchronization between the two programs may vary, requiring extensive testing.
 - The setup assumes both cameras are capable of capturing the entire body. If not, the results may be distorted. Ensure you're capturing the full body from a distance in a spacious area.
 - **Recommended Field of View**: 45 - 70 degrees.
-- This is a Node.js project, so you will need Node.js installed on your system.
+- This is a Node.js project, ~~so you will need Node.js installed on your system.~~
 
 ### Recent Updates
 
 - **August 29, 2024 (KST)**: Improved smoother motion capture capabilities.
 - **August 30, 2024 (KST)**: Improved the efficiency of the code. + Fixed an issue where the Root Bone was not being recognized.
 - **August 30, 2024 (KST)**: Fixed an issue where the Bone's direction frequently flipped, and turning around was incorrectly recognized as facing forward.
+- **August 31, 2024 (KST)**: Adjusted the detection range and frame rate.
+- **September 4, 2024 (KST)**: Add leg correction, change .env to config.txt file
